@@ -151,6 +151,15 @@ object editBackupJobForm: TeditBackupJobForm
           TabOrder = 0
           OnChange = SelectionChange
         end
+        object cbStoreEmptyDirectories: TCheckBox
+          Left = 341
+          Height = 19
+          Top = 5
+          Width = 160
+          Caption = 'Leere Verzeichnisse sichern'
+          TabOrder = 2
+          OnChange = cbStoreEmptyDirectoriesChange
+        end
       end
       object ItemsTree: TLazVirtualStringTree
         Left = 1

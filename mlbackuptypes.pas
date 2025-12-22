@@ -143,9 +143,11 @@ type
     fOnBeginPrepare : TOnBeginPrepare;
     fOnProcessDir : TOnProcessDir;
     fEntireSize : Int64;
+    fStoreEmptyDirectories : boolean;
     procedure   SetPath(const aValue : string);
     procedure   SetOnlySelected(const aValue : boolean);
     function    GetDestBaseDir : string;
+    procedure   SetStoreEmptyDirectories(const Value : boolean);
   protected
     fSourceTree : TRootDirectory;
     function    GetSourceTree : TDirectory; virtual;
@@ -167,6 +169,8 @@ type
     property    SourceTree : TDirectory read GetSourceTree;
     property    OnlySelected : boolean read fOnlySelected write SetOnlySelected;
     property    DestBaseDir : string read GetDestBaseDir;
+    property    StoreEmptyDirectories : boolean read  fStoreEmptyDirectories
+                                                write SetStoreEmptyDirectories;
   end;
 
   // Dieses hält nur eine Liste von Dateien
@@ -780,6 +784,15 @@ begin
   Result := fDestBaseDir;
 end;
 
+procedure TBackupJobItem.SetStoreEmptyDirectories(const Value: boolean);
+begin
+  if fStoreEmptyDirectories <> Value then
+  begin
+    fStoreEmptyDirectories := Value;
+    Modified := true;
+  end;
+end;
+
 procedure TBackupJobItem.SyncWithSource;
 
   procedure DoSetOwner(Item : TMCLPersistent);
@@ -816,18 +829,26 @@ end;
 
 constructor TBackupJobItem.CreateFromStream(st: TMCLWriteReader);
 var s : string;
+    V : Byte;
 begin
   inherited CreateFromStream(st);
+  V := GetClassVersion(TBackupJobItem);
   if count > 0 then s := Items[0].classname;
   fPath := st.ReadString;
   fOnlySelected := st.ReadBoolean;
+  if (V > 0) then
+    fStoreEmptyDirectories := st.ReadBoolean
+  else
+    fStoreEmptyDirectories := false;
 end;
 
 procedure TBackupJobItem.WriteStream(st: TMCLWriteReader);
 begin
+  SetClassVersion(TBackupJobItem, 1);
   inherited;
   st.WriteString(fPath);
   st.WriteBoolean(fOnlySelected);
+  st.WriteBoolean(fStoreEmptyDirectories);
 end;
 
 destructor TBackupJobItem.Destroy;
@@ -906,7 +927,7 @@ function TBackupJobItem.PrepareBackup(aJob : TBackupJob;
          else
            inc(i);
        end;
-       Result := Item.Count = 0;
+       Result := (not (StoreEmptyDirectories)) and (Item.Count = 0);
      end;
    end;
  end;
@@ -938,7 +959,9 @@ var Aborted : boolean;
   var i : integer;
     src, dst : string;
     ErrorMessage : string;
+    s : string;
   begin
+    s := Node.Name;
     if (Node is TFile) then
     begin
       src := PChar(TFile(Node).GetPath);
@@ -949,6 +972,13 @@ var Aborted : boolean;
           if Assigned(aonError) then aOnError(src, dst, ErrorMessage);
         end;
       if Assigned(aOnFileDone) then aOnFileDone();
+    end else
+    if (Node is TDirectory) then
+    begin
+      dst := Node.GetDestPath();
+      if StoreEmptyDirectories then
+        if (not (DirectoryExists(dst))) then
+           ForceDirectories(Dst);
     end;
     if Aborted then exit;
     for i := 0 to Node.Count - 1 do

@@ -17,6 +17,7 @@ type
     BitBtn2: TBitBtn;
     btnAddDir: TSpeedButton;
     btnAddFiles: TSpeedButton;
+    cbStoreEmptyDirectories: TCheckBox;
     edDestination: TDirectoryEdit;
     edDir: TLabeledEdit;
     edJobName: TEdit;
@@ -44,6 +45,7 @@ type
     procedure btnAddDirClick(Sender: TObject);
     procedure btnAddFilesClick(Sender: TObject);
     procedure btnDeleteItemClick(Sender: TObject);
+    procedure cbStoreEmptyDirectoriesChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ItemsTreeChecked(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure ItemsTreeFocusChanged(Sender: TBaseVirtualTree;
@@ -210,6 +212,18 @@ begin
   end;
 end;
 
+procedure TeditBackupJobForm.cbStoreEmptyDirectoriesChange(Sender: TObject);
+var
+  ji : TBackupJobItem;
+begin
+  if Assigned(ItemsTree.FocusedNode) then
+  ji := TBackupJobItem(ItemsTree.GetNodeData(ItemsTree.FocusedNode)^);
+  if Assigned(ji) then
+  begin
+    ji.StoreEmptyDirectories := cbStoreEmptyDirectories.Checked;
+  end;
+end;
+
 procedure TeditBackupJobForm.FormCreate(Sender: TObject);
 begin
   lbWhatIDo.Caption := '';
@@ -284,6 +298,7 @@ begin
       rbOnlySelected.Checked := True
     else
       rbAllExceptSelected.Checked := True;
+    cbStoreEmptyDirectories.Checked := ji.StoreEmptyDirectories;
     Tree.BeginUpdate;
     try
       Tree.Clear;
