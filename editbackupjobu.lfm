@@ -174,7 +174,7 @@ object editBackupJobForm: TeditBackupJobForm
         TabOrder = 2
         TreeOptions.MiscOptions = [toCheckSupport, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
         TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toShowRoot, toThemeAware, toUseBlendedImages]
-        TreeOptions.SelectionOptions = [toFullRowSelect]
+        TreeOptions.SelectionOptions = [toFullRowSelect, toMultiSelect]
         OnChecked = ItemsTreeChecked
         OnFocusChanged = ItemsTreeFocusChanged
         OnGetText = ItemsTreeGetText

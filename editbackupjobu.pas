@@ -63,6 +63,7 @@ type
   private
     fJob : TBackupJob;
     procedure UpdateTree(CurrentItem : TBackupJobItem);
+    procedure CheckButtons;
     procedure ShowDir(s : string);
   protected
   public
@@ -198,18 +199,26 @@ begin
 end;
 
 procedure TeditBackupJobForm.btnDeleteItemClick(Sender: TObject);
-var Node : PVirtualNode;
+var Node, NextNode : PVirtualNode;
     ji : TBackupJobItem;
 begin
-  Node := ItemsTree.FocusedNode;
-  if (Assigned(Node)) then
-    ji := TBackupJobItem(ItemsTree.GetNodeData(Node)^);
-  if (Assigned(ji)) then
+  Node := ItemsTree.GetFirst;
+  while Assigned(Node) do
   begin
-     Tree.Clear();
-     ItemsTree.DeleteNode(Node);
-     fJob.Kill(ji);
+    NextNode := Node^.NextSibling;
+    if ItemsTree.Selected[Node] then
+    begin
+      ji := TBackupJobItem(ItemsTree.GetNodeData(Node)^);
+      if (Assigned(ji)) then
+      begin
+         Tree.Clear();
+         ItemsTree.DeleteNode(Node);
+         fJob.Kill(ji);
+      end;
+    end;
+    Node := NextNode;
   end;
+  CheckButtons;
 end;
 
 procedure TeditBackupJobForm.cbStoreEmptyDirectoriesChange(Sender: TObject);
@@ -287,6 +296,7 @@ var ji : TBackupJobItem;
    end;
 
 begin
+  CheckButtons;
   if (not (Assigned(Node))) then exit;
   ji := TBackupJobItem(ItemsTree.GetNodeData(Node)^);
   if (Assigned(ji)) then
@@ -309,6 +319,7 @@ begin
     end;
   end else
     btnDeleteItem.Enabled := False;
+  CheckButtons;
 end;
 
 procedure TeditBackupJobForm.UpdateTree(CurrentItem: TBackupJobItem);
@@ -326,6 +337,11 @@ procedure TeditBackupJobForm.UpdateTree(CurrentItem: TBackupJobItem);
       Dir.ForEach(@All);
   end;
 begin
+end;
+
+procedure TeditBackupJobForm.CheckButtons;
+begin
+  Panel6.Enabled := ItemsTree.FocusedNode <> nil;
 end;
 
 procedure TeditBackupJobForm.ShowDir(s: string);
@@ -347,6 +363,7 @@ begin
   edJobName.Text := fJob.Name;
   edDestination.Text := fJob.Destination;
   fJob.ForEach(@SetupTree);
+  CheckButtons;
   Result := ShowModal = mrOk;
   if (Result) then
   begin
