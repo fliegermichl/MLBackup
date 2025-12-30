@@ -214,6 +214,7 @@ begin
          Tree.Clear();
          ItemsTree.DeleteNode(Node);
          fJob.Kill(ji);
+         fJob.Modified := true;
       end;
     end;
     Node := NextNode;

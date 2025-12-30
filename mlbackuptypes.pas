@@ -934,6 +934,8 @@ function TBackupJobItem.PrepareBackup(aJob : TBackupJob;
 
 begin
   fOwner := aJob;
+  fEntireSize := 0;
+  Result := fEntireSize;
   if (not (Selected)) then exit;
   fOnBeginPrepare := aOnBeginPrepare;
   fOnProcessDir := aOnProcessDir;
