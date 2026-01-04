@@ -49,7 +49,7 @@
         </CompilerOptions>
       </Item>
       <SharedMatrixOptions Count="1">
-        <Item1 ID="445107347061" Modes="Debug" Value="-gw2 -ddebugnames"/>
+        <Item1 ID="445107347061" Modes="Debug" Value="-gw3 -ddebugnames"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>

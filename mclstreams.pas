@@ -37,6 +37,9 @@ type
     constructor Create;                                                                 // Erzeugt das Objekt und initialisiert das VersionsArray
     constructor CreateFromStream (St: TMCLWriteReader);  virtual;                       // Liest die Klasse aus dem Stream
     destructor destroy; override;                                                       // Gibt das Objekt frei und löscht auch alle Unterobjekte
+    procedure Delete(Index: Integer); virtual;
+    function Extract(item: Pointer): Pointer; virtual;
+
     procedure WriteStream (St: TMCLWriteReader); virtual;                               // Speichert das Objekt im Strema
     procedure Foreach (Action: TForEachProcedure; Forward : boolean = True); overload;  // Führt "Action" für jeden Eintrag der Liste aus
     procedure Foreach (Action: TForEachProcedure2; Forward : boolean = True); overload; // Führt "Action" für jeden Eintrag der Liste aus
@@ -218,6 +221,16 @@ begin
   end;
   fVersionen := NIL;
   inherited destroy;
+end;
+
+procedure TMCLPersistent.Delete(Index: Integer);
+begin
+  inherited Delete(Index);
+end;
+
+function TMCLPersistent.Extract(item: Pointer): Pointer;
+begin
+  Result := inherited Extract(item);
 end;
 
 class function TMCLPersistent.GetClassNum: cardinal;

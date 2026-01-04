@@ -152,8 +152,9 @@ type
     fSourceTree : TRootDirectory;
     function    GetSourceTree : TDirectory; virtual;
     procedure   SyncWithSource;
+    procedure   DestroySourceTree;
   public
-    constructor Create(aOwner : TBackupItem; aPath : string); reintroduce;
+    constructor Create(aOwner : TBackupItem; aPath : string); reintroduce; virtual;
     constructor CreateFromStream(st : TMCLWriteReader); override;
     procedure   WriteStream(st : TMCLWriteReader); override;
     destructor  Destroy; override;
@@ -181,6 +182,7 @@ type
   protected
     function    GetSourceTree : TDirectory; override;
   public
+    constructor Create(aOwner : TBackupItem; aPath : string); override;
     function    GetText(Column : integer) : string; override;
   end;
 
@@ -193,6 +195,8 @@ type
     fEntireSize : int64;
     procedure   SetDestination(AValue: string);
     procedure   SetName(const aValue : string);
+  protected
+    procedure   DestroySourceTree;
   public
     constructor Create(aOwner : TBackupItem); override;
     constructor CreateFromStream(st : TMCLWriteReader); override;
@@ -389,8 +393,10 @@ begin
 end;
 
 function TBackupItem.GetCopy: TBackupItem;
+var ct : TMCLClassType;
 begin
-  Result := TBackupItem(ClassType.Create);
+  ct := TMCLClassType(ClassType);
+  Result := TBackupItem(CT.Create);
   Result.Assign(self);
 end;
 
@@ -810,6 +816,12 @@ begin
   ForEach(@DoSetOwner);
 end;
 
+procedure TBackupJobItem.DestroySourceTree;
+begin
+  fEntireSize := 0;
+  if Assigned(fSourceTree) then FreeAndNil(fSourceTree);
+end;
+
 constructor TBackupJobItem.Create(aOwner: TBackupItem; aPath: string);
 var sr : TSearchRec;
     i : integer;
@@ -877,9 +889,7 @@ begin
   if Result <> '' then
   begin
     if (Length(fPath) > 2) and (fPath[2] = ':') then
-      Result += Copy(fPath, 3, Length(fPath)-2)
-    else
-      Result += fPath;
+      Result += Copy(fPath, 3, Length(fPath)-2);
     Result := IncludeTrailingPathDelimiter(Result);
   end;
 end;
@@ -989,7 +999,7 @@ var Aborted : boolean;
 
 begin
   fOwner := aJob;
-  Result := False;
+  Result := True;
   Aborted := False;
   if (not (Selected)) then exit;
   ProcessNode(SourceTree);
@@ -1016,10 +1026,16 @@ begin
   Result := fSourceTree;
 end;
 
+constructor TBackupJobFilesItem.Create(aOwner: TBackupItem; aPath: string);
+begin
+  inherited Create(aOwner, aPath);
+  OnlySelected := true;
+end;
+
 function TBackupJobFilesItem.GetText(Column: integer): string;
 begin
   if (Column < 1) then
-    Result := Format('%d Dateien in %s', [count, fPath])
+    Result := Format('%d Dateien in %s', [count, GetPath])
   else
     Result := inherited GetText(Column);
 end;
@@ -1031,6 +1047,18 @@ begin
   if fName = aValue then exit;
   fName := aValue;
   Modified := True;
+end;
+
+procedure TBackupJob.DestroySourceTree;
+
+  procedure All(ji : TMCLPersistent);
+  begin
+    TBackupJobItem(ji).DestroySourceTree;
+  end;
+
+begin
+  fEntireSize := 0;
+  ForEach(@All);
 end;
 
 constructor TBackupJob.Create(aOwner: TBackupItem);
@@ -1108,6 +1136,7 @@ begin
     Aborted := False;
     if Assigned(aOnBeginJob) then aOnBeginJob(Format('Bearbeitung %s', [fName]), fEntireSize);
     Result := not Assigned(FirstThat(@all));
+    DestroySourceTree();
   finally
     {$ifdef mswindows}
     SetThreadExecutionState(ES_CONTINUOUS);
@@ -1271,6 +1300,7 @@ begin
   RegisterMCLClass(TDirectory);
   RegisterMCLClass(TFile);
   RegisterMCLClass(TBackupJobItem);
+  RegisterMCLClass(TBackupJobFilesItem);
   RegisterMCLClass(TBackupJob);
   RegisterMCLClass(TBackupJobs);
 end;

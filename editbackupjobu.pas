@@ -287,7 +287,7 @@ var ji : TBackupJobItem;
    var NewNode : PVirtualNode;
        i : integer;
    begin
-     if (aItem is TDirectory) then
+     if (aItem is TDirectory) or (ji is TBackupJobFilesItem) then
      begin
        NewNode := Tree.AddChild(aParentNode, aItem);
        aItem.SetNodeCheckbox(NewNode);

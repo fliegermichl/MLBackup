@@ -408,7 +408,6 @@ object editBackupJobForm: TeditBackupJobForm
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
-        Visible = False
         OnClick = btnAddFilesClick
       end
       object edDir: TLabeledEdit
