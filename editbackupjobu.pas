@@ -243,6 +243,7 @@ end;
 
 procedure TeditBackupJobForm.BitBtn2Click(Sender: TObject);
 var pg : TProgressForm;
+  success : boolean;
 begin
   Tree.Clear;
   fJob.Destination := edDestination.Text;
@@ -253,10 +254,12 @@ begin
       pg := TProgressForm.Create(Application);
       pg.Show();
       fJob.PrepareBackup(@pg.BeginPrepare, @pg.ProcessDir);
-      if not fJob.StartBackup(@pg.BeginJob, @pg.NewFile, @pg.Progress, @pg.FileDone, @pg.Error) then
-        ShowMessage('Backupvorgang abgebrochen!')
+      success := fJob.StartBackup(@pg.BeginJob, @pg.NewFile, @pg.Progress, @pg.FileDone, @pg.Error);
+      pg.FormStyle := fsNormal;
+      if success then
+        ShowMessage('Backupvorgang beendet')
       else
-        ShowMessage('Backupvorgang beendet');
+        ShowMessage('Backupvorgang abgebrochen!');
       if (not (pg.btnError.Visible)) then
       begin
         pg.Hide;
