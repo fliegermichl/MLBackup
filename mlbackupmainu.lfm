@@ -4,10 +4,10 @@ object MLBackupMainform: TMLBackupMainform
   Top = 201
   Width = 429
   Caption = 'MLBackup'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 539
+  ClientWidth = 429
   Position = poScreenCenter
-  LCLVersion = '4.1.0.0'
+  LCLVersion = '4.99.0.0'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   object JobListbox: TListBox
@@ -24,7 +24,7 @@ object MLBackupMainform: TMLBackupMainform
     Left = 304
     Height = 30
     Top = 8
-    Width = 112
+    Width = 115
     Caption = 'Job hinzufügen'
     TabOrder = 1
     OnClick = btnAddBackupJobClick
@@ -33,7 +33,7 @@ object MLBackupMainform: TMLBackupMainform
     Left = 304
     Height = 30
     Top = 40
-    Width = 112
+    Width = 115
     Caption = 'Job bearbeiten'
     TabOrder = 2
     OnClick = btnEditJobClick
@@ -42,9 +42,18 @@ object MLBackupMainform: TMLBackupMainform
     Left = 304
     Height = 30
     Top = 72
-    Width = 112
+    Width = 115
     Caption = 'Job löschen'
     TabOrder = 3
     OnClick = btnDeleteJobClick
+  end
+  object btnCopyJob: TBitBtn
+    Left = 304
+    Height = 30
+    Top = 104
+    Width = 115
+    Caption = 'Job kopieren'
+    TabOrder = 4
+    OnClick = btnCopyJobClick
   end
 end

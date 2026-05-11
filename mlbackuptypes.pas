@@ -111,6 +111,7 @@ type
     function  GetDestSize : Int64;
   public
     function    GetText(Column : integer) : string; override;
+    procedure   Assign(ASource : TBackupItem); override;
     procedure   ClearSize;
     property    Size : Int64 read GetSize;
     property    DestSize : Int64 read GetDestSize;
@@ -124,6 +125,7 @@ type
   public
     function GetPath : string; override;
     function GetDestPath : string; override;
+    procedure   Assign(ASource : TBackupItem); override;
     property ParentJobItem : TBackupJobItem read fParentJobItem write fParentJobItem;
   end;
 
@@ -166,6 +168,7 @@ type
                                                aOnProgress : TOnProgress = nil;
                                                aOnFileDone : TOnFileDone = nil;
                                                aonError    : TOnError = nil) : boolean;
+    procedure   Assign(ASource : TBackupItem); override;
     property    Path : string read fPath write SetPath;
     property    SourceTree : TDirectory read GetSourceTree;
     property    OnlySelected : boolean read fOnlySelected write SetOnlySelected;
@@ -210,6 +213,7 @@ type
                             aOnProgress : TOnProgress = nil;
                             aOnFileDone : TOnFileDone = nil;
                             aOnError    : TOnError = nil) : boolean;
+    procedure   Assign(ASource : TBackupItem); override;
     property    Name : string read fName write SetName;
     property    Destination : string read fDestination write SetDestination;
     property    Items[Index : integer] : TBackupJobItem read Get write Put; default;
@@ -401,9 +405,16 @@ begin
 end;
 
 procedure TBackupItem.Assign(aSource: TBackupItem);
+   procedure All(Item : TMCLPersistent);
+   begin
+     Add(TBackupItem(Item).GetCopy);
+   end;
+
 begin
   fOwner := ASource.Owner;
   fFlags := ASource.fFlags;
+  FreeAll;
+  ASource.ForEach(@All);
 end;
 
 function TBackupItem.Get(Index: Integer): TBackupItem;
@@ -645,6 +656,12 @@ begin
   end;
 end;
 
+procedure TDirectory.Assign(ASource: TBackupItem);
+begin
+  inherited Assign(ASource);
+  fSize := TDirectory(aSource).fSize;
+end;
+
 procedure TDirectory.ClearSize;
 
   procedure all(Item : TMCLPersistent);
@@ -674,6 +691,12 @@ begin
   else
     Result:=inherited GetDestPath;
   if (Result <> '') then Result := IncludeTrailingPathDelimiter(Result);
+end;
+
+procedure TRootDirectory.Assign(ASource: TBackupItem);
+begin
+  inherited Assign(ASource);
+  fParentJobItem := TRootDirectory(aSource).fParentJobItem;
 end;
 
 { TBackupJobItem }
@@ -1006,6 +1029,18 @@ begin
   Result := not Aborted;
 end;
 
+procedure TBackupJobItem.Assign(ASource: TBackupItem);
+begin
+  inherited Assign(ASource);
+  fPath                  := TBackupJobItem(aSource).fPath;
+  fOnlySelected          := TBackupJobItem(aSource).fOnlySelected;
+  fDestBaseDir           := TBackupJobItem(aSource).fDestBaseDir;
+  fOnBeginPrepare        := TBackupJobItem(aSource).fOnBeginPrepare;
+  fOnProcessDir          := TBackupJobItem(aSource).fOnProcessDir;
+  fEntireSize            := TBackupJobItem(aSource).fEntireSize;
+  fStoreEmptyDirectories := TBackupJobItem(aSource).fStoreEmptyDirectories;
+end;
+
 { TBackupJobFilesItem }
 
 function TBackupJobFilesItem.GetSourceTree: TDirectory;
@@ -1142,6 +1177,14 @@ begin
     SetThreadExecutionState(ES_CONTINUOUS);
     {$endif}
   end;
+end;
+
+procedure TBackupJob.Assign(ASource: TBackupItem);
+begin
+  inherited Assign(ASource);
+  fName        := TBackupJob(ASource).fName;
+  fDestination := TBackupJob(ASource).fDestination;
+  fEntireSize  := TBackupJob(ASource).fEntireSize;
 end;
 
 procedure TBackupJob.SetDestination(AValue: string);

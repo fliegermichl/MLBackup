@@ -13,11 +13,13 @@ type
   { TMLBackupMainform }
 
   TMLBackupMainform = class(TForm)
+    btnCopyJob: TBitBtn;
     btnAddBackupJob: TBitBtn;
     btnEditJob: TBitBtn;
     btnDeleteJob: TBitBtn;
     JobListbox: TListBox;
     procedure btnAddBackupJobClick(Sender: TObject);
+    procedure btnCopyJobClick(Sender: TObject);
     procedure btnDeleteJobClick(Sender: TObject);
     procedure btnEditJobClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -44,6 +46,7 @@ implementation
 procedure TMLBackupMainform.FormCreate(Sender: TObject);
 begin
   LoadJobs;
+  Caption := Format('MLBackup %d Bit', [SizeOf(Pointer) * 8]);
 end;
 
 procedure TMLBackupMainform.FormDestroy(Sender: TObject);
@@ -70,6 +73,7 @@ procedure TMLBackupMainform.CheckButtons;
 begin
   btnEditJob.Enabled := JobListBox.ItemIndex >= 0;
   btnDeleteJob.Enabled := btnEditJob.Enabled;
+  btnCopyJob.Enabled := btnEditJob.Enabled;
 end;
 
 procedure TMLBackupMainform.LoadJobs;
@@ -120,6 +124,23 @@ begin
     fJobs.Add(Job);
   end else
     Job.Free;
+end;
+
+procedure TMLBackupMainform.btnCopyJobClick(Sender: TObject);
+var i : Integer;
+    Job : TBackupJob;
+    s : string;
+begin
+  i := JobListBox.ItemIndex;
+  Job := TBackUpJob(JobListbox.Items.Objects[i]);
+  s := 'Kopie von ' + Job.Name;
+  if InputQuery('Job kopieren', 'Bezeichnung der Kopie', s) then
+  begin
+    Job := Job.GetCopy as TBackupJob;
+    Job.Name := s;
+    fJobs.Add(Job);
+    JobListBox.Items.AddObject(Job.Name, Job);
+  end;
 end;
 
 procedure TMLBackupMainform.btnDeleteJobClick(Sender: TObject);
