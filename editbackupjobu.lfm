@@ -8,7 +8,7 @@ object editBackupJobForm: TeditBackupJobForm
   ClientWidth = 1002
   Position = poScreenCenter
   ShowHint = True
-  LCLVersion = '4.1.0.0'
+  LCLVersion = '5.99.0.0'
   OnCreate = FormCreate
   object GroupBox1: TGroupBox
     Left = 0
@@ -519,6 +519,7 @@ object editBackupJobForm: TeditBackupJobForm
           Align = alClient
           TabOrder = 0
           Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
+          ObjectTypes = [otFolders, otHidden]
           OnSelectionChanged = ShellTreeSelectionChanged
         end
       end
